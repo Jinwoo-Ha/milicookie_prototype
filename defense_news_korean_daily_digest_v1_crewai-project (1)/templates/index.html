@@ -215,6 +215,99 @@
             margin-bottom: 8px;
         }
 
+        /* 이메일 전송 섹션 */
+        .email-section {
+            display: none;
+            background: #1a2733;
+            border: 1px solid #263743;
+            border-radius: 12px;
+            padding: 24px 30px;
+            margin-top: 20px;
+        }
+
+        .email-section.visible { display: block; }
+
+        .email-section h3 {
+            color: #ffffff;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+        }
+
+        .email-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .email-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #37474f;
+            border-radius: 8px;
+            background: #0f1923;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .email-input:focus {
+            border-color: #4fc3f7;
+        }
+
+        .email-input::placeholder {
+            color: #546e7a;
+        }
+
+        .email-btn {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .email-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #388e3c, #2e7d32);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(46, 125, 50, 0.4);
+        }
+
+        .email-btn:disabled {
+            background: #37474f;
+            color: #78909c;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .email-msg {
+            margin-top: 12px;
+            font-size: 0.9rem;
+            display: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+        }
+
+        .email-msg.visible { display: block; }
+
+        .email-msg.success {
+            background: #1b3a1b;
+            border: 1px solid #2e7d32;
+            color: #a5d6a7;
+        }
+
+        .email-msg.fail {
+            background: #3e1a1a;
+            border: 1px solid #5c2626;
+            color: #ef9a9a;
+        }
+
         /* 반응형 */
         @media (max-width: 600px) {
             header h1 { font-size: 1.4rem; }
@@ -262,6 +355,16 @@
                 <span class="result-badge" id="resultBadge"></span>
             </div>
             <div class="result-content" id="resultContent"></div>
+        </div>
+
+        <!-- 이메일 전송 섹션 -->
+        <div class="email-section" id="emailSection">
+            <h3>📧 이메일로 결과 발송</h3>
+            <div class="email-form">
+                <input type="email" class="email-input" id="emailInput" placeholder="수신자 이메일 주소를 입력하세요" />
+                <button class="email-btn" id="emailBtn" onclick="sendEmail()">📧 전송</button>
+            </div>
+            <div class="email-msg" id="emailMsg"></div>
         </div>
     </div>
 
@@ -317,6 +420,9 @@
                     document.getElementById('resultBadge').textContent = data.completed_at;
                     document.getElementById('resultSection').classList.add('visible');
 
+                    // 이메일 전송 섹션 표시
+                    document.getElementById('emailSection').classList.add('visible');
+
                     resetButton();
 
                 } else if (data.status === 'error') {
@@ -357,6 +463,48 @@
             const btn = document.getElementById('runBtn');
             btn.disabled = false;
             btn.textContent = '▶ 실행하기';
+        }
+
+        async function sendEmail() {
+            const emailInput = document.getElementById('emailInput');
+            const emailBtn = document.getElementById('emailBtn');
+            const emailMsg = document.getElementById('emailMsg');
+            const to = emailInput.value.trim();
+
+            if (!to) {
+                showEmailMsg('fail', '이메일 주소를 입력해 주세요.');
+                return;
+            }
+
+            emailBtn.disabled = true;
+            emailBtn.textContent = '⏳ 전송 중...';
+            emailMsg.classList.remove('visible');
+
+            try {
+                const res = await fetch('/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ to: to })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showEmailMsg('success', `✅ ${data.message}`);
+                } else {
+                    showEmailMsg('fail', `❌ ${data.message}`);
+                }
+            } catch (err) {
+                showEmailMsg('fail', '❌ 서버 연결에 실패했습니다.');
+            }
+
+            emailBtn.disabled = false;
+            emailBtn.textContent = '📧 전송';
+        }
+
+        function showEmailMsg(type, text) {
+            const el = document.getElementById('emailMsg');
+            el.className = 'email-msg visible ' + type;
+            el.textContent = text;
         }
     </script>
 </body>
