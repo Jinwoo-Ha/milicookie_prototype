@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방산 뉴스 한국어 일일 다이제스트</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f1923;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* 헤더 */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        header h1 span {
+            color: #4fc3f7;
+        }
+
+        header p {
+            color: #90a4ae;
+            font-size: 0.95rem;
+        }
+
+        /* 컨트롤 패널 */
+        .control-panel {
+            background: #1a2733;
+            border: 1px solid #263743;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .run-btn {
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            color: #fff;
+            border: none;
+            padding: 14px 48px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .run-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #1976d2, #1565c0);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(21, 101, 192, 0.4);
+        }
+
+        .run-btn:disabled {
+            background: #37474f;
+            color: #78909c;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 상태 표시 */
+        .status-bar {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #546e7a;
+        }
+
+        .status-dot.idle { background: #546e7a; }
+        .status-dot.running { background: #ffb74d; animation: pulse 1.2s infinite; }
+        .status-dot.completed { background: #66bb6a; }
+        .status-dot.error { background: #ef5350; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .status-text {
+            color: #90a4ae;
+        }
+
+        .time-info {
+            color: #607d8b;
+            font-size: 0.85rem;
+            margin-top: 8px;
+        }
+
+        /* 로딩 스피너 */
+        .spinner-area {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .spinner-area.active { display: block; }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 12px;
+            border: 4px solid #263743;
+            border-top-color: #4fc3f7;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner-text {
+            color: #4fc3f7;
+            font-size: 0.9rem;
+        }
+
+        /* 결과 영역 */
+        .result-section {
+            display: none;
+        }
+
+        .result-section.visible { display: block; }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .result-header h2 {
+            font-size: 1.3rem;
+            color: #ffffff;
+        }
+
+        .result-badge {
+            background: #1b5e20;
+            color: #a5d6a7;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .result-content {
+            background: #1a2733;
+            border: 1px solid #263743;
+            border-radius: 12px;
+            padding: 30px;
+            line-height: 1.85;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .result-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .result-content::-webkit-scrollbar-track {
+            background: #1a2733;
+        }
+
+        .result-content::-webkit-scrollbar-thumb {
+            background: #37474f;
+            border-radius: 3px;
+        }
+
+        /* 에러 표시 */
+        .error-box {
+            display: none;
+            background: #3e1a1a;
+            border: 1px solid #5c2626;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 20px;
+            color: #ef9a9a;
+        }
+
+        .error-box.visible { display: block; }
+
+        .error-box h3 {
+            color: #ef5350;
+            margin-bottom: 8px;
+        }
+
+        /* 반응형 */
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.4rem; }
+            .control-panel { padding: 20px; }
+            .run-btn { padding: 12px 32px; font-size: 1rem; }
+            .result-content { padding: 20px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ 방산 뉴스 <span>한국어 일일 다이제스트</span></h1>
+            <p>Defense News에서 주요 기사를 크롤링하여 한국어로 재작성합니다</p>
+        </header>
+
+        <!-- 컨트롤 패널 -->
+        <div class="control-panel">
+            <button class="run-btn" id="runBtn" onclick="startExecution()">
+                ▶ 실행하기
+            </button>
+
+            <div class="status-bar">
+                <div class="status-dot" id="statusDot"></div>
+                <span class="status-text" id="statusText">대기 중</span>
+            </div>
+            <div class="time-info" id="timeInfo"></div>
+
+            <div class="spinner-area" id="spinnerArea">
+                <div class="spinner"></div>
+                <div class="spinner-text">AI 에이전트가 작업 중입니다... 잠시 기다려 주세요.</div>
+            </div>
+        </div>
+
+        <!-- 에러 표시 -->
+        <div class="error-box" id="errorBox">
+            <h3>⚠️ 실행 오류</h3>
+            <p id="errorText"></p>
+        </div>
+
+        <!-- 결과 영역 -->
+        <div class="result-section" id="resultSection">
+            <div class="result-header">
+                <h2>📰 분석 결과</h2>
+                <span class="result-badge" id="resultBadge"></span>
+            </div>
+            <div class="result-content" id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let pollingInterval = null;
+
+        async function startExecution() {
+            const btn = document.getElementById('runBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ 실행 중...';
+
+            // UI 초기화
+            document.getElementById('resultSection').classList.remove('visible');
+            document.getElementById('errorBox').classList.remove('visible');
+            document.getElementById('spinnerArea').classList.add('active');
+            updateStatus('running', '실행 중...');
+
+            try {
+                const res = await fetch('/run', { method: 'POST' });
+                const data = await res.json();
+
+                if (!data.success) {
+                    alert(data.message);
+                    resetButton();
+                    return;
+                }
+
+                // 상태 폴링 시작 (3초 간격)
+                pollingInterval = setInterval(checkStatus, 3000);
+            } catch (err) {
+                updateStatus('error', '서버 연결 실패');
+                document.getElementById('spinnerArea').classList.remove('active');
+                resetButton();
+            }
+        }
+
+        async function checkStatus() {
+            try {
+                const res = await fetch('/status');
+                const data = await res.json();
+
+                if (data.status === 'completed') {
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+
+                    updateStatus('completed', '완료');
+                    document.getElementById('spinnerArea').classList.remove('active');
+                    document.getElementById('timeInfo').textContent =
+                        `시작: ${data.started_at}  |  완료: ${data.completed_at}`;
+
+                    // 결과 표시
+                    document.getElementById('resultContent').textContent = data.result;
+                    document.getElementById('resultBadge').textContent = data.completed_at;
+                    document.getElementById('resultSection').classList.add('visible');
+
+                    resetButton();
+
+                } else if (data.status === 'error') {
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+
+                    updateStatus('error', '오류 발생');
+                    document.getElementById('spinnerArea').classList.remove('active');
+                    document.getElementById('errorText').textContent = data.error;
+                    document.getElementById('errorBox').classList.add('visible');
+
+                    resetButton();
+
+                } else if (data.status === 'running') {
+                    // 경과 시간 표시
+                    if (data.started_at) {
+                        const start = new Date(data.started_at);
+                        const now = new Date();
+                        const diff = Math.floor((now - start) / 1000);
+                        const min = Math.floor(diff / 60);
+                        const sec = diff % 60;
+                        document.getElementById('timeInfo').textContent =
+                            `경과 시간: ${min}분 ${sec}초`;
+                    }
+                }
+            } catch (err) {
+                // 네트워크 에러는 무시하고 다시 시도
+            }
+        }
+
+        function updateStatus(state, text) {
+            const dot = document.getElementById('statusDot');
+            dot.className = 'status-dot ' + state;
+            document.getElementById('statusText').textContent = text;
+        }
+
+        function resetButton() {
+            const btn = document.getElementById('runBtn');
+            btn.disabled = false;
+            btn.textContent = '▶ 실행하기';
+        }
+    </script>
+</body>
+</html>

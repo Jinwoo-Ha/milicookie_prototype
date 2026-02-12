@@ -1,0 +1,25 @@
+[project]
+name = "defense_news_korean_daily_digest"
+version = "0.1.0"
+description = "defense_news_korean_daily_digest using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[litellm,tools]==1.9.3",
+    "flask>=3.0",
+]
+
+[project.scripts]
+defense_news_korean_daily_digest = "defense_news_korean_daily_digest.main:run"
+run_crew = "defense_news_korean_daily_digest.main:run"
+train = "defense_news_korean_daily_digest.main:train"
+replay = "defense_news_korean_daily_digest.main:replay"
+test = "defense_news_korean_daily_digest.main:test"
+run_with_trigger = "defense_news_korean_daily_digest.main:run_with_trigger"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"
