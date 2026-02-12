@@ -97,9 +97,9 @@ class DefenseNewsKoreanDailyDigestCrew:
         )
     
     @task
-    def analyze_and_prioritize_top_5_articles(self) -> Task:
+    def analyze_and_prioritize_top_7_articles(self) -> Task:
         return Task(
-            config=self.tasks_config["analyze_and_prioritize_top_5_articles"],
+            config=self.tasks_config["analyze_and_prioritize_top_7_articles"],
             markdown=False,
             
             

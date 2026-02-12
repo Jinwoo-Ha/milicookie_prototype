@@ -1,44 +1,62 @@
 ---
 scrape_defense_news_articles:
-  description: Scrape the latest articles from https://www.defensenews.com/ website.
-    Extract article headlines, publication dates, author information, article summaries/previews,
-    and full article links. Focus on today's and recent articles, capturing comprehensive
-    article metadata and content previews to enable effective analysis.
-  expected_output: 'A structured list of defense news articles containing: article
-    headlines, publication dates, authors, article summaries/previews, full article
-    URLs, and any available tags or categories. Format the output in a clear, organized
-    manner for easy analysis.'
+  description: >
+    Scrape the latest articles from the following defense news websites -
+    1) https://www.defensenews.com/
+    2) https://breakingdefense.com/
+    3) https://www.shephardmedia.com/news/
+    4) https://www.janes.com/osint-insights/defence-news
+    For each website, extract article headlines, publication dates, author information,
+    article summaries/previews, and full article links. Focus on today's and recent
+    articles, capturing comprehensive article metadata and content previews to enable
+    effective analysis. Scrape all four sources thoroughly.
+  expected_output: >
+    A structured list of defense news articles from all four sources
+    containing source website name, article headlines, publication dates, authors,
+    article summaries/previews, full article URLs, and any available tags or categories.
+    Format the output in a clear, organized manner grouped by source for easy analysis.
   agent: defense_news_web_scraper
-analyze_and_prioritize_top_5_articles:
-  description: 'Analyze all scraped defense news articles and identify the 5 most
+analyze_and_prioritize_top_7_articles:
+  description: 'Analyze all scraped defense news articles from all four sources
+    (Defense News, Breaking Defense, Shephard Media, Janes) and identify the 7 most
     important and newsworthy articles. Evaluate articles based on: strategic significance,
     breaking news value, geopolitical impact, defense industry relevance, policy implications,
-    and technological developments. Rank articles by importance and provide justification
-    for selections.'
-  expected_output: 'A ranked list of the top 5 most important defense news articles
+    and technological developments. Select the best 7 articles across all sources
+    regardless of which website they came from. Rank articles by importance and provide
+    justification for selections.'
+  expected_output: 'A ranked list of the top 7 most important defense news articles
     with detailed analysis explaining why each article was selected. Include: article
-    ranking (1-5), title, brief summary, importance score/reasoning, strategic implications,
-    and the original article URL for reference.'
+    ranking (1-7), source website, title, brief summary, importance score/reasoning,
+    strategic implications, and the original article URL for reference.'
   agent: defense_news_analyst
   context:
   - scrape_defense_news_articles
 rewrite_articles_in_korean:
-  description: Take the 5 prioritized defense news articles and rewrite them completely
+  description: >
+    Take the 7 prioritized defense news articles and rewrite them completely
     in Korean with maximum detail and accuracy. Base your writing strictly on the
     original source material, expanding on technical details, strategic implications,
-    and contextual information found in the source articles. For each article, include
-    a dedicated <배경> (Background) section that explains essential background knowledge
-    Korean readers need to understand the article - including military terminology,
-    geopolitical context, historical background, and relevant strategic frameworks.
-    Ensure proper translation of all technical terms and maintain journalistic precision
-    throughout.
-  expected_output: '5 complete, detailed Korean-language defense news articles, each
-    containing: 1) Korean headline, 2) <배경> (Background) section explaining essential
-    context and terminology, 3) Full comprehensive Korean article text with detailed
-    coverage based on original source, 4) Proper Korean military terminology throughout,
-    5) Cultural context appropriate for Korean readers, 6) Original source attribution
-    and publication information. Each article should be substantially detailed, informative,
-    and accessible to Korean readers regardless of their prior defense knowledge.'
+    and contextual information found in the source articles.
+    For each article, structure the output as follows -
+    1) Korean headline as the article title
+    2) A <배경> section providing essential background context such as geopolitical
+    situation, historical background, and relevant strategic frameworks. Do NOT
+    include terminology explanations or glossary-style definitions.
+    3) A <기사> section containing the full comprehensive Korean article text
+    with detailed coverage based on the original source.
+    4) End with Original Source showing only the source news outlet name, not the URL.
+    For example - Original Source: Defense News  or  Original Source: Breaking Defense
+    Ensure proper Korean military terminology throughout and maintain journalistic
+    precision. Do not include any separate terminology explanation sections.
+  expected_output: >
+    7 complete, detailed Korean-language defense news articles. Each article must
+    follow this exact structure -
+    1) Korean headline
+    2) <배경> section with essential background context (no terminology definitions)
+    3) <기사> section with full comprehensive Korean article text
+    4) Original Source with only the source news outlet name (e.g. Original Source: Defense News)
+    Each article should be substantially detailed, informative, and accessible
+    to Korean readers. Do not include terminology glossaries or definition lists.
   agent: korean_defense_content_writer
   context:
-  - analyze_and_prioritize_top_5_articles
+  - analyze_and_prioritize_top_7_articles
