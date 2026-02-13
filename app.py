@@ -202,7 +202,7 @@ def send_gmail(to_email: str, subject: str, body_text: str) -> dict:
     """
 
     params = {
-        "from": "MiliCookie <onboarding@resend.dev>",
+        "from": "MiliCookie <noreply@milicookie.cloud>",
         "to": [to_email],
         "subject": subject,
         "html": html_body,
