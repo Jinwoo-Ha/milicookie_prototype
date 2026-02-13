@@ -219,7 +219,7 @@ def send_gmail(to_email: str, subject: str, body_text: str) -> dict:
 
 @app.route("/send-email", methods=["POST"])
 def send_email():
-    """결과를 이메일로 발송"""
+    """결과를 이메일로 발송하기"""
     data = request.get_json()
     to_email = data.get("to", "").strip() if data else ""
 
