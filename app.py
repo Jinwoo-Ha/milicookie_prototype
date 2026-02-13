@@ -290,9 +290,9 @@ def scheduled_crew_and_send():
 
 
 def daily_scheduler():
-    """매일 KST 21:10에 scheduled_crew_and_send를 실행하는 스케줄러"""
-    TARGET_HOUR = 21
-    TARGET_MINUTE = 10
+    """매일 KST 06:30에 scheduled_crew_and_send를 실행하는 스케줄러"""
+    TARGET_HOUR = 6
+    TARGET_MINUTE = 30
 
     while True:
         now = datetime.now(KST)
@@ -315,9 +315,9 @@ def daily_scheduler():
 
 
 if __name__ == "__main__":
-    # 스케줄러 시작 (매일 KST 21:10 자동 실행)
+    # 스케줄러 시작 (매일 KST 06:30 자동 실행)
     scheduler_thread = threading.Thread(target=daily_scheduler, daemon=True)
     scheduler_thread.start()
-    print(f"[Scheduler] 스케줄러 시작됨 - 매일 KST 21:10 자동 실행")
+    print(f"[Scheduler] 스케줄러 시작됨 - 매일 KST 06:30 자동 실행")
 
     app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)
