@@ -8,6 +8,7 @@ import sys
 import smtplib
 import threading
 import time
+import resend     # Resend 라이브러리 추가
 from datetime import datetime, timedelta, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -100,12 +101,12 @@ def get_status():
 
 
 def send_gmail(to_email: str, subject: str, body_text: str) -> dict:
-    """Gmail SMTP를 통해 이메일 발송"""
-    gmail_address = os.getenv("GMAIL_ADDRESS")
-    gmail_password = os.getenv("GMAIL_APP_PASSWORD")
+    """Resend API를 통해 이메일 발송 (SMTP 차단 우회)"""
+    api_key = os.getenv("RESEND_API_KEY")
+    if not api_key:
+        return {"success": False, "error": "RESEND_API_KEY가 설정되지 않았습니다."}
 
-    if not gmail_address or not gmail_password:
-        return {"success": False, "error": "GMAIL_ADDRESS 또는 GMAIL_APP_PASSWORD가 .env에 설정되지 않았습니다."}
+    resend.api_key = api_key
 
     # HTML 본문 구성
     today = datetime.now().strftime("%Y년 %m월 %d일")
@@ -200,19 +201,17 @@ def send_gmail(to_email: str, subject: str, body_text: str) -> dict:
     </html>
     """
 
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = gmail_address
-    msg["To"] = to_email
-
-    msg.attach(MIMEText(body_text, "plain", "utf-8"))
-    msg.attach(MIMEText(html_body, "html", "utf-8"))
+    params = {
+        "from": "MiliCookie <onboarding@resend.dev>",
+        "to": [to_email],
+        "subject": subject,
+        "html": html_body,
+        "text": body_text,
+    }
 
     try:
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(gmail_address, gmail_password)
-            server.sendmail(gmail_address, to_email, msg.as_string())
+        # Resend API 호출
+        email = resend.Emails.send(params)
         return {"success": True}
     except Exception as e:
         return {"success": False, "error": str(e)}
