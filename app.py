@@ -209,7 +209,8 @@ def send_gmail(to_email: str, subject: str, body_text: str) -> dict:
     msg.attach(MIMEText(html_body, "html", "utf-8"))
 
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
             server.login(gmail_address, gmail_password)
             server.sendmail(gmail_address, to_email, msg.as_string())
         return {"success": True}
